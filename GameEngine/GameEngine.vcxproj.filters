@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Default">
+      <UniqueIdentifier>{1e602cfc-9ffa-45e9-b258-e2a825b31c08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{38883897-5b67-41f6-9321-b28e0cf73689}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Header">
+      <UniqueIdentifier>{ef5fe98c-813c-4b33-8b5f-e4288cc6410b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Core">
+      <UniqueIdentifier>{df0ea0fb-f1f2-4b06-bcf2-f295f3f33769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Object">
+      <UniqueIdentifier>{64738209-8009-4e03-b504-320fe9352bcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager">
+      <UniqueIdentifier>{0e0cc8c3-ab4b-46ab-96d1-457270f61eed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\ResourceManager">
+      <UniqueIdentifier>{45bccfb0-27dc-4ee7-968c-f1d26c5362e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource">
+      <UniqueIdentifier>{8245150d-b11d-4540-9395-3c1ae7b50492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource\Texture">
+      <UniqueIdentifier>{66445a91-747c-4da1-88d6-a588133c3ef9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\PathManager">
+      <UniqueIdentifier>{b8831711-17e7-4657-94be-9c9c2c7cbd32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\InputManager">
+      <UniqueIdentifier>{26c74196-419c-4ed1-9c24-22f9f7c32936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Object\Block">
+      <UniqueIdentifier>{ee3dbf43-4e45-4ef7-a054-50f982683cb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Object\Board">
+      <UniqueIdentifier>{cae6c52a-c5c1-4efe-b1d2-fb2535cb2809}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="GameEngine.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="define.h">
+      <Filter>Engine\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="const.h">
+      <Filter>Engine\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="struct.h">
+      <Filter>Engine\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Engine\Manager\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GameResource.h">
+      <Filter>Engine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Engine\Resource\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="PathManager.h">
+      <Filter>Engine\Manager\PathManager</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Engine\Manager\InputManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>Engine\Object\Block</Filter>
+    </ClInclude>
+    <ClInclude Include="Board.h">
+      <Filter>Engine\Object\Board</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GameEngine.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="GameEngine.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="Core.cpp">
+      <Filter>Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Engine\Manager\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GameResource.cpp">
+      <Filter>Engine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Engine\Resource\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="PathManager.cpp">
+      <Filter>Engine\Manager\PathManager</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Engine\Manager\InputManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>Engine\Object\Block</Filter>
+    </ClCompile>
+    <ClCompile Include="Board.cpp">
+      <Filter>Engine\Object\Board</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
