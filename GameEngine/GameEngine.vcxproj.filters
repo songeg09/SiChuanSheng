@@ -38,11 +38,11 @@
     <Filter Include="Engine\Manager\InputManager">
       <UniqueIdentifier>{26c74196-419c-4ed1-9c24-22f9f7c32936}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Object\Block">
-      <UniqueIdentifier>{ee3dbf43-4e45-4ef7-a054-50f982683cb1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Object\Board">
-      <UniqueIdentifier>{cae6c52a-c5c1-4efe-b1d2-fb2535cb2809}</UniqueIdentifier>
+      <UniqueIdentifier>{63c7a96c-125b-409b-9fb2-054e618d95b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Object\Card">
+      <UniqueIdentifier>{1ec03246-4f89-4f78-a8cb-a72e79dc472d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -86,11 +86,11 @@
     <ClInclude Include="InputManager.h">
       <Filter>Engine\Manager\InputManager</Filter>
     </ClInclude>
-    <ClInclude Include="Block.h">
-      <Filter>Engine\Object\Block</Filter>
-    </ClInclude>
     <ClInclude Include="Board.h">
       <Filter>Engine\Object\Board</Filter>
+    </ClInclude>
+    <ClInclude Include="Card.h">
+      <Filter>Engine\Object\Card</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -126,11 +126,11 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Engine\Manager\InputManager</Filter>
     </ClCompile>
-    <ClCompile Include="Block.cpp">
-      <Filter>Engine\Object\Block</Filter>
-    </ClCompile>
     <ClCompile Include="Board.cpp">
       <Filter>Engine\Object\Board</Filter>
+    </ClCompile>
+    <ClCompile Include="Card.cpp">
+      <Filter>Engine\Object\Card</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

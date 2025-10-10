@@ -8,7 +8,7 @@ const Vector2 Directions[4] = {
 	{ -1,0}
 };
 
-enum class GAMESTATE
+enum class GAME_STATE
 {
 	PREGAME,
 	PLAY,
@@ -16,8 +16,10 @@ enum class GAMESTATE
 	LOSE
 };
 
-class Block;
+class Board;
 class Texture;
+class Card;
+
 class Core
 {
 	SINGLETON(Core)
@@ -27,10 +29,9 @@ private:
 	Vector2					m_WindowSize;
 	Vector2					m_WindowStartPosition;
 	Texture*				m_pBackGroundTexture;
-	GAMESTATE				m_GameState;
-	int						m_iNumOfFlags;
 
-	std::shared_ptr<Block>	m_blockBoard[BOARD_HEIGHT][BOARD_WIDTH];
+	std::unique_ptr<Board>	m_Board;
+	GAME_STATE				m_State;
 
 	HBITMAP					m_hBackBoardBitMap;
 	HDC						m_hBackDC;
@@ -40,21 +41,9 @@ public:
 	HWND GethWnd() { return m_hWnd; }
 	HDC GetMainDC() { return m_hDC; }
 	Vector2 GetWindowSize() { return m_WindowSize; }
+
 private:
-	void UpdateBlocks();
 	void Update();
 	void Render();
-
-	// 게임 관련 함수들
-	void Shuffle();
-	void SetBlocks();
-	int GetAdjBombs(const Vector2 _pos);
-	bool PositionOutOfBounds(const Vector2& _pos);
-	void RevealBombs();
-	void RevealAdjBlocks(const Vector2 _vec2);
-
-	bool WinCheck();
-	void HandleBlockClicked(const Vector2 _vec2);
-	void HandleBombClicked();
 };
 

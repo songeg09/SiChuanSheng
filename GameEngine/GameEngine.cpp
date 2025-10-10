@@ -7,6 +7,8 @@
 
 #define MAX_LOADSTRING 100
 
+#pragma comment(lib, "Msimg32.lib")
+
 // 전역 변수:
 HWND hWnd;
 HINSTANCE hInst;                                // 현재 인스턴스입니다.

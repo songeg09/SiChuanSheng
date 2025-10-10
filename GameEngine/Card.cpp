@@ -2,75 +2,76 @@
 #include "Card.h"
 #include "Texture.h"
 #include "ResourceManager.h"
-#include "MouseManager.h"
+#include <format>
 
-Card::Card()
+
+
+Card::Card(int _iTextureNum, Vector2 _vec2Position)
 {
-	m_vec2Position = {};
+	std::wstring strFileName = std::format(L"card_{:02}.bmp", _iTextureNum);
+	m_pTexture = ResourceManager::GetInstance()->LoadTexture(strFileName);
+
+	strFileName = std::format(L"card_{:02}_selected.bmp", _iTextureNum);
+	m_pTextureSelected = ResourceManager::GetInstance()->LoadTexture(strFileName);
+
+	m_State = CARD_STATE::VISIBLE;
+
+	SetPosition(_vec2Position);
+}
+
+Card::Card(Vector2 _vec2Position)
+{
+	m_State = CARD_STATE::EMPTY;
 	m_pTexture = nullptr;
+	m_pTextureSelected = nullptr;
+	SetPosition(_vec2Position);
 }
 
-Card::~Card()
+void Card::Render(HDC _hDC)
 {
-
-}
-
-bool Card::operator==(const Card& _other) const
-{
-	return m_pTexture->GetKey() == _other.m_pTexture->GetKey();
-}
-
-bool Card::Update()
-{
-	if (m_bFaceUp == true) return false;
-
-	if (PtInRect(&m_rectClickArea, MouseManager::GetInstance()->GetMouseCursor()))
+	static int x, y;
+	switch (m_State)
 	{
-		if (MouseManager::GetInstance()->IsClicked())
-		{
-			m_bFaceUp = true;
-			return true;
-		}
+	case CARD_STATE::VISIBLE:
+		x = BOARD_START_X + (m_pTexture->GetWidth() * m_vec2Position.x) - (MARGIN * m_vec2Position.x);
+		y = BOARD_START_Y + (m_pTexture->GetHeight() * m_vec2Position.y);
+		TransparentBlt(_hDC, x, y, m_pTexture->GetWidth(), m_pTexture->GetHeight(),
+			m_pTexture->GetDC(), 0, 0, m_pTexture->GetWidth(), m_pTexture->GetHeight(), RGB(255, 0, 255));
+		break;
+
+	case CARD_STATE::SELECTED:
+		x = BOARD_START_X + (m_pTextureSelected->GetWidth() * m_vec2Position.x) - (MARGIN * m_vec2Position.x);
+		y = BOARD_START_Y + (m_pTextureSelected->GetHeight() * m_vec2Position.y);
+		TransparentBlt(_hDC, x, y, m_pTextureSelected->GetWidth(), m_pTextureSelected->GetHeight(), 
+			m_pTextureSelected->GetDC(), 0,0, m_pTextureSelected->GetWidth(), m_pTextureSelected->GetHeight(), RGB(255,0,255));
+		break;
+	}
+}
+
+bool Card::Update(const POINT& pt)
+{
+	if (m_State != CARD_STATE::VISIBLE) return false;
+
+	if (PtInRect(&m_ClickArea, pt))
+	{
+		m_State = CARD_STATE::SELECTED;
+		return true;
 	}
 
 	return false;
 }
 
-void Card::Init(Vector2 _vec2Position, Texture* _pTexture)
+void Card::SetPosition(Vector2 _newPos)
 {
-	m_vec2Position = _vec2Position;
-	m_pTexture = _pTexture;
-	m_rectClickArea.left = GetPosition().x - m_pTexture->GetWidth() / 2;
-	m_rectClickArea.top = GetPosition().y - m_pTexture->GetHeight() / 2;
-	m_rectClickArea.right = m_rectClickArea.left + m_pTexture->GetWidth();
-	m_rectClickArea.bottom = m_rectClickArea.top + m_pTexture->GetHeight();
-	m_bFaceUp = true;
-}
+	m_vec2Position = _newPos;
 
-void Card::SetPosition(Vector2 _vec2Position)
-{
-	m_vec2Position = _vec2Position;
-	m_rectClickArea.left = GetPosition().x - m_pTexture->GetWidth() / 2;
-	m_rectClickArea.top = GetPosition().y - m_pTexture->GetHeight() / 2;
-	m_rectClickArea.right = m_rectClickArea.left + m_pTexture->GetWidth();
-	m_rectClickArea.bottom = m_rectClickArea.top + m_pTexture->GetHeight();
-}
-
-void Card::Render(HDC _hDC)
-{
-	Vector2 Position = GetPosition();
-	static Texture* BackSide = ResourceManager::GetInstance()->FindTexture(L"µÞ¸é");
-	if (m_bFaceUp == true)
+	if (m_pTexture != nullptr)
 	{
-		Position.x -= m_pTexture->GetWidth() / 2;
-		Position.y -= m_pTexture->GetHeight() / 2;
-		BitBlt(_hDC, Position.x, Position.y, m_pTexture->GetWidth(), m_pTexture->GetHeight(), m_pTexture->GetDC(), 0, 0, SRCCOPY);
-	}
-	else
-	{
-		Position.x -= BackSide->GetWidth() / 2;
-		Position.y -= BackSide->GetHeight() / 2;
-		BitBlt(_hDC, Position.x, Position.y, BackSide->GetWidth(), BackSide->GetHeight(), BackSide->GetDC(), 0, 0, SRCCOPY);
+		int x = BOARD_START_X + (m_pTexture->GetWidth() * m_vec2Position.x) - (MARGIN * m_vec2Position.x);
+		int y = BOARD_START_Y + (m_pTexture->GetHeight() * m_vec2Position.y);
+		m_ClickArea = { x,y,x + m_pTexture->GetWidth() , y + m_pTexture->GetHeight() };
 	}
 	
 }
+
+

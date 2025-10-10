@@ -108,6 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,8 +131,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Block.h" />
     <ClInclude Include="Board.h" />
+    <ClInclude Include="Card.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="define.h" />
@@ -148,8 +149,8 @@
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Block.cpp" />
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Card.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GameResource.cpp" />
