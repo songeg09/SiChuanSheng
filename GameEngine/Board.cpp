@@ -83,6 +83,13 @@ void Board::InitialShuffle()
 
 void Board::InGameShuffle()
 {
+	// 셔플하기 전 선택 초기화
+	if (m_SelectedCard1 != nullptr)
+	{
+		m_SelectedCard1->SetState(CARD_STATE::VISIBLE);
+		m_SelectedCard1 = nullptr;
+	}
+
 	// iterator들 캐싱하기
 	std::vector< std::set<std::shared_ptr<Card>>::iterator> its;
 	its.reserve(m_VisibleCards.size());
@@ -99,7 +106,7 @@ void Board::InGameShuffle()
 		if(index1 == index2)
 			index2 = (index2 + 1) % its.size();
 
-		SwapCards(*its[index1], *its[index2]);
+		SwapCards(*(its[index1]), *(its[index2]));
 	}
 }
 
@@ -136,23 +143,25 @@ bool Board::CardSelection()
 	{
 		return true;
 	}
-
-	m_SelectedCard1->SetState(CARD_STATE::VISIBLE);
-	m_SelectedCard1 = m_SelectedCard2;
-	return false;
+	else
+	{
+		m_SelectedCard1->SetState(CARD_STATE::VISIBLE);
+		m_SelectedCard1 = m_SelectedCard2;
+		m_SelectedCard2 = nullptr;
+		return false;
+	}	
 }
 
 bool Board::CanBeReached(std::shared_ptr<Card> card1, std::shared_ptr<Card> card2)
 {
-	static Vector2 Directions[4] = { {0,-1},{1,0},{0,1},{-1,0} };
+	static Vector2 Directions[4] = { {0,-1},{1,0},{0,1},{-1,0} };	
+	Vector2 Start = card1->GetPosition();
+	Vector2 End = card2->GetPosition();
+
+	std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, Cmp> PQ;
+	std::vector<std::vector<std::shared_ptr<Node>>> vec2BestNode(BOARD_HEIGHT, std::vector<std::shared_ptr<Node>>(BOARD_WIDTH, nullptr));
 	
-	std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> PQ;
-	// first = turn, second = F
-	std::vector<std::vector<std::pair<int, int>>> vecMapBestCost(BOARD_HEIGHT, std::vector<std::pair<int, int>>(BOARD_WIDTH, { INT32_MAX,INT32_MAX }));
-	std::map<std::pair<int, Vector2>, std::pair<int, Vector2>> mapBestParent;
-	
-	AStarNode CurNode = { card1->GetPosition().GetDistance(card2->GetPosition()),0, 0, card1->GetPosition(), Vector2(-1,-1)};
-	
+	std::shared_ptr<Node> CurNode = std::make_shared<Node>( Start.GetDistance(End),0, 0, Start, nullptr);
 	PQ.push(CurNode);
 
 	while (!PQ.empty())
@@ -160,81 +169,57 @@ bool Board::CanBeReached(std::shared_ptr<Card> card1, std::shared_ptr<Card> card
 		CurNode = PQ.top();
 		PQ.pop();
 
-		if (vecMapBestCost[CurNode.Pos.y][CurNode.Pos.x] < std::make_pair(CurNode.Turn , CurNode.F))
+		if (vec2BestNode[CurNode->Pos.y][CurNode->Pos.x] != nullptr
+			&& *vec2BestNode[CurNode->Pos.y][CurNode->Pos.x] < *CurNode)
 			continue;
-		if (CurNode.Pos == card2->GetPosition())
+		
+		vec2BestNode[CurNode->Pos.y][CurNode->Pos.x] = CurNode;
+
+		if (CurNode->Pos == End)
 			break;
 
 		for (Vector2 Dir: Directions)
 		{
-			AStarNode NextNode; 
-			NextNode.Pos = CurNode.Pos + Dir;
-			NextNode.PrevPos = CurNode.Pos;
+			std::shared_ptr<Node> NextNode = std::make_shared<Node>();
+			NextNode->Pos = CurNode->Pos + Dir;
+			NextNode->PrevNode = CurNode;
 			// 갈 수 없는 곳이면 continue
-			if (OutOfRange(NextNode.Pos)) continue;
-			if (NextNode.Pos != card2->GetPosition() && m_Cards[NextNode.Pos.y][NextNode.Pos.x]->GetState() != CARD_STATE::INVISIBLE) continue;
+			if (OutOfRange(NextNode->Pos)) continue;
+			if (NextNode->Pos != End && m_Cards[NextNode->Pos.y][NextNode->Pos.x]->GetState() != CARD_STATE::INVISIBLE) continue;
 			
-			NextNode.Turn = CurNode.Turn;
-			if (CurNode.PrevPos != Vector2(-1,-1) 
-				&& abs((NextNode.Pos - CurNode.PrevPos).x) == 1
-				&& abs((NextNode.Pos - CurNode.PrevPos).y) == 1)
-				NextNode.Turn++;
-			if (NextNode.Turn >= 3) continue;
+			NextNode->Turn = CurNode->Turn;
+			if (CurNode->PrevNode != nullptr
+				&& abs((NextNode->Pos - CurNode->PrevNode->Pos).x) == 1
+				&& abs((NextNode->Pos - CurNode->PrevNode->Pos).y) == 1)
+				NextNode->Turn++;
+			if (NextNode->Turn >= 3) continue;
 
-			NextNode.G = CurNode.G + 1;
-			NextNode.F = NextNode.G + NextNode.Pos.GetDistance(card2->GetPosition());
-			if (vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] < std::make_pair(NextNode.Turn, NextNode.F))
-				continue;
-			
-			vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] = std::make_pair(NextNode.Turn, NextNode.F);
-			
-			if (mapBestParent.find({ NextNode.Turn, NextNode.Pos }) != mapBestParent.end()
-				|| mapBestParent[{NextNode.Turn, NextNode.Pos}] > std::make_pair(CurNode.Turn, CurNode.Pos))
-			{
-				mapBestParent[{NextNode.Turn, NextNode.Pos}] = { CurNode.Turn, CurNode.Pos };
-				PQ.push(NextNode);
-			}
-				
+			NextNode->G = CurNode->G + 1;
+			NextNode->F = NextNode->G + NextNode->Pos.GetDistance(End);
+
+			PQ.push(NextNode);
 		}
 	}
 
-	bool FinishEarly = true;
-	for (int i = 0; i < 3; ++i)
-	{
-		if (mapBestParent.find({i, card2->GetPosition() }) != mapBestParent.end())
-		{
-			FinishEarly = false;
-			break;
-		}
-	}
-	if (FinishEarly) 
+	if (vec2BestNode[End.y][End.x] == nullptr)
 		return false;
-	
-	
-	for (int turn = 0; turn < 3; ++turn)
+
+	std::shared_ptr<Node> Prev = vec2BestNode[End.y][End.x];
+	std::shared_ptr<Node> Cur = vec2BestNode[End.y][End.x]->PrevNode;
+	std::shared_ptr<Node> Next;
+	while (true)
 	{
-		if (mapBestParent.find({ turn, card2->GetPosition() }) == mapBestParent.end())
-			continue;
+		if (Cur->Pos == Start)
+			break;
 
-		int CurTurn = turn;
-		std::pair<int, Vector2> Prev = { CurTurn,card2->GetPosition() };
-		std::pair<int, Vector2> Cur = mapBestParent[{CurTurn, card2->GetPosition()}];
-		std::pair<int, Vector2> Next;
+		Next = Cur->PrevNode;
 
-		while (true)
-		{
-			if (Cur.second == card1->GetPosition())
-				break;
+		// 여기서 마킹 해주기
+		m_Cards[Cur->Pos.y][Cur->Pos.x]->MarkPath(Cur->Pos - Prev->Pos, Cur->Pos - Next->Pos);
 
-			Next = mapBestParent[Cur];
-
-			// 여기서 마킹 해주기
-			m_Cards[Cur.second.y][Cur.second.x]->MarkPath(Cur.second - Prev.second, Cur.second - Next.second);
-
-			m_vec2MarkedPaths.push(Cur.second);
-			Prev = Cur;
-			Cur = Next;
-		}
+		m_vec2MarkedPaths.push(Cur->Pos);
+		Prev = Cur;
+		Cur = Next;
 	}
 
 	return true;

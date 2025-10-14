@@ -1,4 +1,6 @@
 #pragma once
+#include <climits>
+#include <memory>
 
 struct Vector2
 {
@@ -57,43 +59,50 @@ struct Vector2
 	}
 };
 
-struct AStarNode
+struct Node
 {
 	int		F;
 	int		G;
 	int     Turn;
 	Vector2 Pos;
-	Vector2 PrevPos;
+	std::shared_ptr<Node>	PrevNode;
 
-	AStarNode()
+	Node()
 	{
-		F = 0;
+		F = INT_MAX;
 		G = 0;
-		Turn = 0;
-		Pos = Vector2(0,0);
-		PrevPos = Vector2(0, 0);
+		Turn = INT_MAX;
+		Pos = Vector2(-1,-1);
+		PrevNode = nullptr;
 	}
 
-	AStarNode(int _F, int _G, int _Turn, Vector2 _Pos, Vector2 _PrevPos)
+	Node(int _F, int _G, int _Turn, Vector2 _Pos, std::shared_ptr <Node> _PrevNode)
 	{
 		F = _F;
 		G = _G;
 		Turn = _Turn;
 		Pos = _Pos;
-		PrevPos = _PrevPos;
+		PrevNode = _PrevNode;
 	}
 
-	bool operator< (const AStarNode _other) const
+	bool operator< (const Node _other) const
 	{
 		if (Turn == _other.Turn)
 			return F < _other.F;
 		return Turn < _other.Turn;
 	}
 
-	bool operator> (const AStarNode _other) const
+	bool operator> (const Node _other) const
 	{
 		if (Turn == _other.Turn)
 			return F > _other.F;
 		return Turn > _other.Turn;
+	}
+};
+
+struct Cmp {
+	bool operator() (const std::shared_ptr<Node>& a,
+		const std::shared_ptr<Node>& b) const {
+		return *a > *b;
 	}
 };
