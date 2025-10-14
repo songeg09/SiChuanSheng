@@ -50,7 +50,7 @@ void Board::PrepareGame()
 	{
 		for (int x = 0; x < BOARD_WIDTH; ++x)
 		{
-			if (m_Cards[y][x]->HasTexture() && m_Cards[y][x]->GetState() == CARD_STATE::INVISIBLE)
+			if (m_Cards[y][x]->HasTexture())
 			{
 				m_Cards[y][x]->SetState(CARD_STATE::VISIBLE);
 				m_VisibleCards.insert(m_Cards[y][x]);
@@ -71,8 +71,8 @@ void Board::InitialShuffle()
 	int x1, y1, x2, y2;
 	for (int i = 0; i < NUM_OF_SHUFFLES; ++i)
 	{
-		x1 = (rand() % (BOARD_WIDTH - 2)) + 1 ;
-		y1 = (rand() % (BOARD_HEIGHT - 2)) + 1 ;
+		x1 = (rand() % (BOARD_WIDTH - 2)) + 1;
+		y1 = (rand() % (BOARD_HEIGHT - 2)) + 1;
 
 		x2 = (rand() % (BOARD_WIDTH - 2)) + 1;
 		y2 = (rand() % (BOARD_HEIGHT - 2)) + 1;
