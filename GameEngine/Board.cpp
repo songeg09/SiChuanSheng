@@ -147,11 +147,12 @@ bool Board::CanBeReached(std::shared_ptr<Card> card1, std::shared_ptr<Card> card
 	static Vector2 Directions[4] = { {0,-1},{1,0},{0,1},{-1,0} };
 	
 	std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> PQ;
-	std::vector<std::vector<int>> vecMapBestCost(BOARD_HEIGHT, std::vector<int>(BOARD_WIDTH, INT32_MAX));
-	std::map<Vector2, Vector2> mapBestParent;
+	// first = turn, second = F
+	std::vector<std::vector<std::pair<int, int>>> vecMapBestCost(BOARD_HEIGHT, std::vector<std::pair<int, int>>(BOARD_WIDTH, { INT32_MAX,INT32_MAX }));
+	std::map<std::pair<int, Vector2>, std::pair<int, Vector2>> mapBestParent;
 	
-	AStarNode CurNode = { card1->GetPosition().GetDistance(card2->GetPosition()),0,card1->GetPosition()};
-	AStarNode NextNode;
+	AStarNode CurNode = { card1->GetPosition().GetDistance(card2->GetPosition()),0, 0, card1->GetPosition(), Vector2(-1,-1)};
+	
 	PQ.push(CurNode);
 
 	while (!PQ.empty())
@@ -159,52 +160,81 @@ bool Board::CanBeReached(std::shared_ptr<Card> card1, std::shared_ptr<Card> card
 		CurNode = PQ.top();
 		PQ.pop();
 
-		if (vecMapBestCost[CurNode.Pos.y][CurNode.Pos.x] < CurNode.F)
+		if (vecMapBestCost[CurNode.Pos.y][CurNode.Pos.x] < std::make_pair(CurNode.Turn , CurNode.F))
 			continue;
 		if (CurNode.Pos == card2->GetPosition())
 			break;
 
 		for (Vector2 Dir: Directions)
 		{
+			AStarNode NextNode; 
 			NextNode.Pos = CurNode.Pos + Dir;
-			
+			NextNode.PrevPos = CurNode.Pos;
 			// 갈 수 없는 곳이면 continue
 			if (OutOfRange(NextNode.Pos)) continue;
 			if (NextNode.Pos != card2->GetPosition() && m_Cards[NextNode.Pos.y][NextNode.Pos.x]->GetState() != CARD_STATE::INVISIBLE) continue;
+			
+			NextNode.Turn = CurNode.Turn;
+			if (CurNode.PrevPos != Vector2(-1,-1) 
+				&& abs((NextNode.Pos - CurNode.PrevPos).x) == 1
+				&& abs((NextNode.Pos - CurNode.PrevPos).y) == 1)
+				NextNode.Turn++;
+			if (NextNode.Turn >= 3) continue;
 
 			NextNode.G = CurNode.G + 1;
 			NextNode.F = NextNode.G + NextNode.Pos.GetDistance(card2->GetPosition());
-			if (vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] <= NextNode.F)
+			if (vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] < std::make_pair(NextNode.Turn, NextNode.F))
 				continue;
-						
-			vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] = NextNode.F;
-			mapBestParent[NextNode.Pos] = CurNode.Pos;
-			PQ.push(NextNode);
+			
+			vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] = std::make_pair(NextNode.Turn, NextNode.F);
+			
+			if (mapBestParent.find({ NextNode.Turn, NextNode.Pos }) != mapBestParent.end()
+				|| mapBestParent[{NextNode.Turn, NextNode.Pos}] > std::make_pair(CurNode.Turn, CurNode.Pos))
+			{
+				mapBestParent[{NextNode.Turn, NextNode.Pos}] = { CurNode.Turn, CurNode.Pos };
+				PQ.push(NextNode);
+			}
+				
 		}
 	}
 
-	if (mapBestParent.find(card2->GetPosition()) == mapBestParent.end())
+	bool FinishEarly = true;
+	for (int i = 0; i < 3; ++i)
 	{
-		return false;
-	}
-
-	Vector2 Prev = card2->GetPosition();
-	Vector2 Cur = mapBestParent[card2->GetPosition()];
-	Vector2 Next;
-	
- 	while (true)
-	{
-		if (Cur == card1->GetPosition())
+		if (mapBestParent.find({i, card2->GetPosition() }) != mapBestParent.end())
+		{
+			FinishEarly = false;
 			break;
-		
-		Next = mapBestParent[Cur];
+		}
+	}
+	if (FinishEarly) 
+		return false;
+	
+	
+	for (int turn = 0; turn < 3; ++turn)
+	{
+		if (mapBestParent.find({ turn, card2->GetPosition() }) == mapBestParent.end())
+			continue;
 
-		// 여기서 마킹 해주기
-		m_Cards[Cur.y][Cur.x]->MarkPath(Prev - Next);
+		int CurTurn = turn;
+		std::pair<int, Vector2> Prev = { CurTurn,card2->GetPosition() };
+		std::pair<int, Vector2> Cur = mapBestParent[{CurTurn, card2->GetPosition()}];
+		std::pair<int, Vector2> Next;
 
-		m_vec2MarkedPaths.push(Cur);
-		Prev = Cur;
-		Cur = Next;
+		while (true)
+		{
+			if (Cur.second == card1->GetPosition())
+				break;
+
+			Next = mapBestParent[Cur];
+
+			// 여기서 마킹 해주기
+			m_Cards[Cur.second.y][Cur.second.x]->MarkPath(Cur.second - Prev.second, Cur.second - Next.second);
+
+			m_vec2MarkedPaths.push(Cur.second);
+			Prev = Cur;
+			Cur = Next;
+		}
 	}
 
 	return true;

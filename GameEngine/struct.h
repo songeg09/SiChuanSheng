@@ -34,6 +34,13 @@ struct Vector2
 		return x < _other.x;
 	}
 
+	bool operator>(const Vector2 _other) const
+	{
+		if (y != _other.y)
+			return y > _other.y;
+		return x > _other.x;
+	}
+
 	Vector2 operator+(const Vector2 _vec2)
 	{
 		return Vector2(x + _vec2.x, y + _vec2.y);
@@ -54,29 +61,39 @@ struct AStarNode
 {
 	int		F;
 	int		G;
+	int     Turn;
 	Vector2 Pos;
+	Vector2 PrevPos;
 
 	AStarNode()
 	{
 		F = 0;
 		G = 0;
+		Turn = 0;
 		Pos = Vector2(0,0);
+		PrevPos = Vector2(0, 0);
 	}
 
-	AStarNode(int _F, int _G, Vector2 _Pos)
+	AStarNode(int _F, int _G, int _Turn, Vector2 _Pos, Vector2 _PrevPos)
 	{
 		F = _F;
 		G = _G;
+		Turn = _Turn;
 		Pos = _Pos;
+		PrevPos = _PrevPos;
 	}
 
 	bool operator< (const AStarNode _other) const
 	{
-		return F < _other.F;
+		if (Turn == _other.Turn)
+			return F < _other.F;
+		return Turn < _other.Turn;
 	}
 
 	bool operator> (const AStarNode _other) const
 	{
-		return F > _other.F;
+		if (Turn == _other.Turn)
+			return F > _other.F;
+		return Turn > _other.Turn;
 	}
 };

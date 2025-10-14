@@ -85,24 +85,26 @@ bool Card::operator==(const Card _other)
 	return m_pTexture->GetKey() == _other.m_pTexture->GetKey();
 }
 
-void Card::MarkPath(const Vector2 dir)
+void Card::MarkPath( Vector2 inVec,  Vector2 outVec)
 {
-	if (abs(dir.x) == 2)
+	Vector2 Combined = inVec + outVec;
+	if (abs(inVec.x) + abs(outVec.x) == 2)
 		m_State = CARD_STATE::PATH_HORIZONTAL;
-	else if (abs(dir.y) == 2)
+	else if (abs(inVec.y) + abs(outVec.y) == 2)
 		m_State = CARD_STATE::PATH_VERTICAL;
-	else if (dir.x == -1 && dir.y == -1)
-		m_State = CARD_STATE::PATH_DOWNTOLEFT;
-	else if (dir.x == 1 && dir.y == -1)
+	else if (Combined.x == -1 && Combined.y == -1)
 		m_State = CARD_STATE::PATH_DOWNTORIGHT;
-	else if(dir.x == -1 && dir.y == 1)
-		m_State = CARD_STATE::PATH_UPTOLEFT;
-	else if(dir.x == 1 && dir.y == 1)
+	else if (Combined.x == 1 && Combined.y == -1)
+		m_State = CARD_STATE::PATH_DOWNTOLEFT;
+	else if(Combined.x == -1 && Combined.y == 1)
 		m_State = CARD_STATE::PATH_UPTORIGHT;
+	else if(Combined.x == 1 && Combined.y == 1)
+		m_State = CARD_STATE::PATH_UPTOLEFT;
 }
 
 bool Card::Update(const POINT& pt)
 {
+	if (!HasTexture()) return false;
 	if (m_State != CARD_STATE::VISIBLE) return false;
 
 	if (PtInRect(&m_ClickArea, pt))

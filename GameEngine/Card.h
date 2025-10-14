@@ -34,7 +34,7 @@ public:
 
 	bool operator==(const Card _other);
 
-	void MarkPath(const Vector2 dir);
+	void MarkPath( Vector2 inVec,  Vector2 outVec);
 
 	bool HasTexture() { return m_pTexture != nullptr; }
 

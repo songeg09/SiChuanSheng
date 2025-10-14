@@ -57,7 +57,7 @@ void Core::Init(HWND _hWnd)
 	m_Board = std::make_unique<Board>(m_hBackDC);
 	m_Board->Init();
 	m_tTimer = std::make_unique<Timer>();
-	m_tTimer->SetTimer(1000, std::bind(&Core::DecraseTime, this));
+	m_tTimer->SetTimer(TIME_SPEED, std::bind(&Core::DecraseTime, this));
 	m_State = GAME_STATE::PREGAME;
 }
 
@@ -103,9 +103,9 @@ void Core::Update()
 		break;
 
 	case GAME_STATE::CORRECT:
-		Sleep(3000);
+		Sleep(SHOWING_TIME);
 		m_iScore += 10;
-		
+		m_iTimeLeft = min(MAX_TIME, m_iTimeLeft + TIMER_PER_BLOCK);
 		m_Board->HandleCorrect();
 		if (m_Board->WinCheck())
 			m_State = GAME_STATE::WIN;
