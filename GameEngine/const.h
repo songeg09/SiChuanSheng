@@ -9,5 +9,15 @@ constexpr int BOARD_START_X = 20;
 constexpr int BOARD_START_Y = 78;
 constexpr int MARGIN = 5;
 
-constexpr int FLAGLEFT_START_X = 673;
-constexpr int FLAGLEFT_START_Y = 480;
+constexpr int SCORE_X = 574;
+constexpr int SCORE_Y = 24;
+
+constexpr int SHUFFLE_COUNT_X = 614;
+constexpr int SHUFFLE_COUNT_Y = 529;
+constexpr int MAX_SHUFFLE_COUNT = 100;
+constexpr int NUM_OF_SHUFFLES = 300;
+
+constexpr int MAX_TIME = 60;
+constexpr int TIMER_PER_BLOCK = 5;
+constexpr int TIMER_START_X = 80;
+constexpr int TIMER_START_Y = 514;

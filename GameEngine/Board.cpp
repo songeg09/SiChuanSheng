@@ -11,6 +11,11 @@ Board::~Board()
 {
 }
 
+bool Board::OutOfRange(const Vector2 _vec2)
+{
+	return !(0<=_vec2.x && _vec2.x < BOARD_WIDTH && 0<=_vec2.y && _vec2.y < BOARD_HEIGHT);
+}
+
 void Board::Init()
 {
 	int CardNum = 0;
@@ -45,7 +50,7 @@ void Board::PrepareGame()
 	{
 		for (int x = 0; x < BOARD_WIDTH; ++x)
 		{
-			if (m_Cards[y][x]->GetState() == CARD_STATE::INVISIBLE)
+			if (m_Cards[y][x]->HasTexture() && m_Cards[y][x]->GetState() == CARD_STATE::INVISIBLE)
 			{
 				m_Cards[y][x]->SetState(CARD_STATE::VISIBLE);
 				m_VisibleCards.insert(m_Cards[y][x]);
@@ -64,7 +69,7 @@ void Board::PrepareGame()
 void Board::InitialShuffle()
 {
 	int x1, y1, x2, y2;
-	for (int i = 0; i < TOTAL_CARDS * 4; ++i)
+	for (int i = 0; i < NUM_OF_SHUFFLES; ++i)
 	{
 		x1 = (rand() % (BOARD_WIDTH - 2)) + 1 ;
 		y1 = (rand() % (BOARD_HEIGHT - 2)) + 1 ;
@@ -86,7 +91,7 @@ void Board::InGameShuffle()
 
 	// 실제 셔플은 여기서 수행
 	int index1, index2;
-	for (int i = 0; i < its.size() * 4; ++i)
+	for (int i = 0; i < NUM_OF_SHUFFLES; ++i)
 	{
 		index1 = rand() % its.size();
 		index2 = rand() % its.size();
@@ -121,37 +126,135 @@ void Board::RenderCards()
 	}
 }
 
-UPDATE_RESULT Board::Update()
+bool Board::CardSelection()
 {
-	InputManager::GetInstance()->Update();
+	UpdateCards();
+	if (m_SelectedCard1 == nullptr || m_SelectedCard2 == nullptr) 
+		return false;
 
-	if (InputManager::GetInstance()->GetKeyState(VK_RBUTTON) == KEY_STATE::DOWN)
+	if (*m_SelectedCard1 == *m_SelectedCard2 && CanBeReached(m_SelectedCard1, m_SelectedCard2))
 	{
-		InGameShuffle();
-		return UPDATE_RESULT::KEEP_PLAYING;
+		return true;
 	}
-	else if (InputManager::GetInstance()->GetKeyState(VK_LBUTTON) == KEY_STATE::DOWN)
+
+	m_SelectedCard1->SetState(CARD_STATE::VISIBLE);
+	m_SelectedCard1 = m_SelectedCard2;
+	return false;
+}
+
+bool Board::CanBeReached(std::shared_ptr<Card> card1, std::shared_ptr<Card> card2)
+{
+	static Vector2 Directions[4] = { {0,-1},{1,0},{0,1},{-1,0} };
+	
+	std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> PQ;
+	std::vector<std::vector<int>> vecMapBestCost(BOARD_HEIGHT, std::vector<int>(BOARD_WIDTH, INT32_MAX));
+	std::map<Vector2, Vector2> mapBestParent;
+	
+	AStarNode CurNode = { card1->GetPosition().GetDistance(card2->GetPosition()),0,card1->GetPosition()};
+	AStarNode NextNode;
+	PQ.push(CurNode);
+
+	while (!PQ.empty())
 	{
-		POINT pt = InputManager::GetInstance()->GetCursorPosition();
-		
-		for (std::shared_ptr<Card> card : m_VisibleCards)
+		CurNode = PQ.top();
+		PQ.pop();
+
+		if (vecMapBestCost[CurNode.Pos.y][CurNode.Pos.x] < CurNode.F)
+			continue;
+		if (CurNode.Pos == card2->GetPosition())
+			break;
+
+		for (Vector2 Dir: Directions)
 		{
-			if (card->Update(pt))
+			NextNode.Pos = CurNode.Pos + Dir;
+			
+			// 갈 수 없는 곳이면 continue
+			if (OutOfRange(NextNode.Pos)) continue;
+			if (NextNode.Pos != card2->GetPosition() && m_Cards[NextNode.Pos.y][NextNode.Pos.x]->GetState() != CARD_STATE::INVISIBLE) continue;
+
+			NextNode.G = CurNode.G + 1;
+			NextNode.F = NextNode.G + NextNode.Pos.GetDistance(card2->GetPosition());
+			if (vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] <= NextNode.F)
+				continue;
+						
+			vecMapBestCost[NextNode.Pos.y][NextNode.Pos.x] = NextNode.F;
+			mapBestParent[NextNode.Pos] = CurNode.Pos;
+			PQ.push(NextNode);
+		}
+	}
+
+	if (mapBestParent.find(card2->GetPosition()) == mapBestParent.end())
+	{
+		return false;
+	}
+
+	Vector2 Prev = card2->GetPosition();
+	Vector2 Cur = mapBestParent[card2->GetPosition()];
+	Vector2 Next;
+	
+ 	while (true)
+	{
+		if (Cur == card1->GetPosition())
+			break;
+		
+		Next = mapBestParent[Cur];
+
+		// 여기서 마킹 해주기
+		m_Cards[Cur.y][Cur.x]->MarkPath(Prev - Next);
+
+		m_vec2MarkedPaths.push(Cur);
+		Prev = Cur;
+		Cur = Next;
+	}
+
+	return true;
+}
+
+void Board::UpdateCards()
+{
+	POINT pt = InputManager::GetInstance()->GetCursorPosition();
+
+	for (std::shared_ptr<Card> card : m_VisibleCards)
+	{
+		if (card->Update(pt))
+		{
+			if (m_SelectedCard1 == nullptr)
 			{
-				if (m_SelectedCard1 == nullptr)
-				{
-					m_SelectedCard1 = card;
-				}
-				else
-				{
-					m_SelectedCard1->SetState(CARD_STATE::VISIBLE);
-					m_SelectedCard1 = card;
-
-					
-				}
-
-				break;
+				m_SelectedCard1 = card;
 			}
+			else
+			{
+				m_SelectedCard2 = card;
+			}
+			break;
 		}
 	}
 }
+
+void Board::HandleCorrect()
+{
+	Vector2 vec2Pos;
+	while (!m_vec2MarkedPaths.empty())
+	{
+		vec2Pos = m_vec2MarkedPaths.front();
+		m_vec2MarkedPaths.pop();
+		
+		m_Cards[vec2Pos.y][vec2Pos.x]->SetState(CARD_STATE::INVISIBLE);
+	}
+
+	m_SelectedCard1->SetState(CARD_STATE::INVISIBLE);
+	m_SelectedCard2->SetState(CARD_STATE::INVISIBLE);
+
+	m_VisibleCards.erase(m_SelectedCard1);
+	m_VisibleCards.erase(m_SelectedCard2);
+
+	m_SelectedCard1 = nullptr;
+	m_SelectedCard2 = nullptr;
+}
+
+bool Board::WinCheck()
+{
+	return m_VisibleCards.size() == 0;
+}
+
+

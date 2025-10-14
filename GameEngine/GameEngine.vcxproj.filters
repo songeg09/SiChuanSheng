@@ -44,6 +44,12 @@
     <Filter Include="Engine\Object\Card">
       <UniqueIdentifier>{1ec03246-4f89-4f78-a8cb-a72e79dc472d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Utility">
+      <UniqueIdentifier>{ca985ccf-01dd-4925-9642-16eaf28b926c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utility\Timer">
+      <UniqueIdentifier>{1ac1d68e-ed25-46f6-a058-0d5b1132d1f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -91,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="Card.h">
       <Filter>Engine\Object\Card</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Engine\Utility\Timer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

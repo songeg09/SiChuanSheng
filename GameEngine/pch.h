@@ -14,3 +14,4 @@
 #include <functional>
 #include <list>
 #include <set>
+#include <climits>

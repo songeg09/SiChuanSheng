@@ -2,10 +2,16 @@
 
 enum CARD_STATE
 {
-	EMPTY,
 	VISIBLE,
 	SELECTED,
 	INVISIBLE,
+
+	PATH_HORIZONTAL,
+	PATH_VERTICAL,
+	PATH_UPTOLEFT,
+	PATH_UPTORIGHT,
+	PATH_DOWNTOLEFT,
+	PATH_DOWNTORIGHT,
 };
 
 class Texture;
@@ -26,7 +32,11 @@ public:
 	bool Update(const POINT& pt);
 	void Render(HDC _hDC);
 
+	bool operator==(const Card _other);
 
+	void MarkPath(const Vector2 dir);
+
+	bool HasTexture() { return m_pTexture != nullptr; }
 
 	// Getters & Setters
 	CARD_STATE GetState() { return m_State; }

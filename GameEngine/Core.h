@@ -12,6 +12,7 @@ enum class GAME_STATE
 {
 	PREGAME,
 	PLAY,
+	CORRECT,
 	WIN,
 	LOSE
 };
@@ -19,6 +20,7 @@ enum class GAME_STATE
 class Board;
 class Texture;
 class Card;
+class Timer;
 
 class Core
 {
@@ -30,6 +32,10 @@ private:
 	Vector2					m_WindowStartPosition;
 	Texture*				m_pBackGroundTexture;
 
+	int						m_iScore;
+	int						m_iShuffleCount;
+	int						m_iTimeLeft;
+	std::unique_ptr<Timer>	m_tTimer;
 	std::unique_ptr<Board>	m_Board;
 	GAME_STATE				m_State;
 
@@ -41,6 +47,8 @@ public:
 	HWND GethWnd() { return m_hWnd; }
 	HDC GetMainDC() { return m_hDC; }
 	Vector2 GetWindowSize() { return m_WindowSize; }
+
+	void DecraseTime();
 
 private:
 	void Update();
