@@ -16,7 +16,7 @@ private:
 	std::shared_ptr<Card>			m_SelectedCard2;
 
 public:
-	void Init();
+	void Init(HDC _hBackDC);
 
 	void PrepareGame();
 	void InitialShuffle();
@@ -32,7 +32,7 @@ public:
 
 	void RenderCards();
 
-	Board(HDC _hBackDC);
+	Board();
 	~Board();
 
 private:

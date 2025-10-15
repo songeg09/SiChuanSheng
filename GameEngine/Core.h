@@ -1,5 +1,7 @@
 #pragma once
-#include"pch.h"
+#include "pch.h"
+#include "Timer.h"
+#include "Board.h"
 
 const Vector2 Directions[4] = {
 	{0,-1},
@@ -17,10 +19,9 @@ enum class GAME_STATE
 	LOSE
 };
 
-class Board;
+
 class Texture;
 class Card;
-class Timer;
 
 class Core
 {
@@ -35,8 +36,8 @@ private:
 	int						m_iScore;
 	int						m_iShuffleCount;
 	int						m_iTimeLeft;
-	std::unique_ptr<Timer>	m_tTimer;
-	std::unique_ptr<Board>	m_Board;
+	Timer					m_tTimer;
+	Board					m_Board;
 	GAME_STATE				m_State;
 
 	HBITMAP					m_hBackBoardBitMap;

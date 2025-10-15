@@ -17,6 +17,7 @@ Core::Core()
 	m_pBackGroundTexture = nullptr;
 	m_hBackBoardBitMap = nullptr;
 	m_hBackDC = nullptr;
+	
 }
 
 Core::~Core()
@@ -54,10 +55,8 @@ void Core::Init(HWND _hWnd)
 	SetTextAlign(m_hBackDC, TA_CENTER);
 
 	// 보드 생성 및, 초기 값 설정
-	m_Board = std::make_unique<Board>(m_hBackDC);
-	m_Board->Init();
-	m_tTimer = std::make_unique<Timer>();
-	m_tTimer->SetTimer(TIME_SPEED, std::bind(&Core::DecraseTime, this));
+	m_Board.Init(m_hBackDC);
+	m_tTimer.SetTimer(TIME_SPEED, std::bind(&Core::DecraseTime, this));
 	m_State = GAME_STATE::PREGAME;
 }
 
@@ -82,22 +81,23 @@ void Core::Update()
 		m_iScore = 0;
 		m_iShuffleCount = MAX_SHUFFLE_COUNT;
 		m_iTimeLeft = MAX_TIME;
-		m_Board->PrepareGame();
+		m_tTimer.ResetTimer();
+		m_Board.PrepareGame();
 		m_State = GAME_STATE::PLAY;
 		break;
 
 	case GAME_STATE::PLAY:
-		m_tTimer->CheckTimer();
+		m_tTimer.CheckTimer();
 		InputManager::GetInstance()->Update();
 
 		if (InputManager::GetInstance()->GetKeyState(VK_RBUTTON) == KEY_STATE::DOWN && m_iShuffleCount > 0)
 		{
-			m_Board->InGameShuffle();
+			m_Board.InGameShuffle();
 			m_iShuffleCount--;
 		}
 		else if (InputManager::GetInstance()->GetKeyState(VK_LBUTTON) == KEY_STATE::DOWN)
 		{
-			if (m_Board->CardSelection())
+			if (m_Board.CardSelection())
 				m_State = GAME_STATE::CORRECT;
 		}
 		break;
@@ -106,8 +106,8 @@ void Core::Update()
 		Sleep(SHOWING_TIME);
 		m_iScore += 10;
 		m_iTimeLeft = min(MAX_TIME, m_iTimeLeft + TIMER_PER_BLOCK);
-		m_Board->HandleCorrect();
-		if (m_Board->WinCheck())
+		m_Board.HandleCorrect();
+		if (m_Board.WinCheck())
 			m_State = GAME_STATE::WIN;
 		else
 			m_State = GAME_STATE::PLAY;
@@ -145,7 +145,7 @@ void Core::Render()
 	BitBlt(m_hBackDC, 0, 0, m_pBackGroundTexture->GetWidth(), m_pBackGroundTexture->GetHeight(), m_pBackGroundTexture->GetDC(), 0, 0, SRCCOPY);
 	
 	// 2. 카드 렌더링
-	m_Board->RenderCards();
+	m_Board.RenderCards();
 	
 	// 3. 점수 및 남은 셔플 횟수 렌더링
 	static std::wstring txt;

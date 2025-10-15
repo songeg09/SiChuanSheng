@@ -2,9 +2,9 @@
 #include "Card.h"
 #include "InputManager.h"
 
-Board::Board(HDC _hBackDC)
+Board::Board()
 {
-	m_hBackDC = _hBackDC;
+	
 }
 
 Board::~Board()
@@ -16,8 +16,10 @@ bool Board::OutOfRange(const Vector2 _vec2)
 	return !(0<=_vec2.x && _vec2.x < BOARD_WIDTH && 0<=_vec2.y && _vec2.y < BOARD_HEIGHT);
 }
 
-void Board::Init()
+void Board::Init(HDC _hBackDC)
 {
+	m_hBackDC = _hBackDC;
+
 	int CardNum = 0;
 	for (int y = 0; y < BOARD_HEIGHT; ++y)
 	{

@@ -35,6 +35,8 @@ public:
 		return false;
 	}
 
+	void ResetTimer() { m_iOldTime = clock(); }
+
 	// Getter & Setter
 	void ChangeSecond(int iSecond)
 	{
