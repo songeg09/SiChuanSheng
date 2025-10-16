@@ -19,6 +19,12 @@ public:
 	void Init(HDC _hBackDC);
 
 	void PrepareGame();
+
+	void PrepareTest();
+	void SettingCards();
+	void TestIsReady();
+	void SelectTestCards();
+
 	void InitialShuffle();
 	void InGameShuffle();
 	void SwapCards(std::shared_ptr<Card> card1, std::shared_ptr<Card> card2);
@@ -34,6 +40,10 @@ public:
 
 	Board();
 	~Board();
+
+	// Getter
+	std::shared_ptr<Card> GetSelectedCard1() { return m_SelectedCard1; }
+	std::shared_ptr<Card> GetSelectedCard2() { return m_SelectedCard2; }
 
 private:
 	bool OutOfRange(const Vector2 _vec2);

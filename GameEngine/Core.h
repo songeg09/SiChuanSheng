@@ -12,6 +12,10 @@ const Vector2 Directions[4] = {
 
 enum class GAME_STATE
 {
+	PRETEST,
+	TESTSETUP,
+	TESTING,
+
 	PREGAME,
 	PLAY,
 	CORRECT,

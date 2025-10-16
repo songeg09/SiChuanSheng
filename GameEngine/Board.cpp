@@ -68,6 +68,92 @@ void Board::PrepareGame()
 	m_SelectedCard2 = nullptr;
 }
 
+void Board::PrepareTest()
+{
+	for (int y = 0; y < BOARD_HEIGHT; ++y)
+	{
+		for (int x = 0; x < BOARD_WIDTH; ++x)
+		{
+			if (m_Cards[y][x]->HasTexture())
+			{
+				m_Cards[y][x]->SetState(CARD_STATE::VISIBLE);
+			}
+		}
+	}
+
+	m_SelectedCard1 = nullptr;
+	m_SelectedCard2 = nullptr;
+}
+
+void Board::SettingCards()
+{
+	POINT pt = InputManager::GetInstance()->GetCursorPosition();
+
+	for (std::shared_ptr<Card> card : m_VisibleCards)
+	{
+		if (card->SelectCard(pt))
+		{
+			break;
+		}
+	}
+}
+
+void Board::TestIsReady()
+{
+	for (int y = 0; y < BOARD_HEIGHT; ++y)
+	{
+		for (int x = 0; x < BOARD_WIDTH; ++x)
+		{
+			if (m_Cards[y][x]->HasTexture())
+			{
+				if (m_Cards[y][x]->GetState() == CARD_STATE::SELECTED)
+				{
+					m_Cards[y][x]->SetState(CARD_STATE::VISIBLE);
+					m_VisibleCards.insert(m_Cards[y][x]);
+				}
+				else if(m_Cards[y][x]->GetState() == CARD_STATE::VISIBLE)
+					m_Cards[y][x]->SetState(CARD_STATE::INVISIBLE);
+					
+			}
+		}
+	}
+}
+
+void Board::SelectTestCards()
+{
+	POINT pt = InputManager::GetInstance()->GetCursorPosition();
+
+	for (std::shared_ptr<Card> card : m_VisibleCards)
+	{
+		if (card->SelectCard(pt))
+		{
+			if (m_SelectedCard1 == nullptr)
+			{
+				m_SelectedCard1 = card;
+			}
+			else
+			{
+				m_SelectedCard2 = card;
+				if (CanBeReached(m_SelectedCard1, m_SelectedCard2))
+					std::cout << "POSSIBLE!" << std::endl;
+				else
+					std::cout << "IMPOSSIBLE!" << std::endl;
+
+
+				m_SelectedCard1->SetState(CARD_STATE::VISIBLE);
+				m_SelectedCard2->SetState(CARD_STATE::VISIBLE);
+
+				m_SelectedCard1 = nullptr;
+				m_SelectedCard2 = nullptr;
+			}
+			break;
+
+			break;
+		}
+	}
+
+}
+
 void Board::InitialShuffle()
 {
 	int x1, y1, x2, y2;
@@ -171,34 +257,42 @@ bool Board::CanBeReached(std::shared_ptr<Card> card1, std::shared_ptr<Card> card
 		CurNode = PQ.top();
 		PQ.pop();
 
-		if (vec2BestNode[CurNode->Pos.y][CurNode->Pos.x] != nullptr
-			&& *vec2BestNode[CurNode->Pos.y][CurNode->Pos.x] < *CurNode)
-			continue;
-		
-		vec2BestNode[CurNode->Pos.y][CurNode->Pos.x] = CurNode;
-
 		if (CurNode->Pos == End)
 			break;
 
+		std::shared_ptr<Node> NewCurNode = std::make_shared<Node>(
+			CurNode->F, CurNode->G, CurNode->Turn + 1, CurNode->Pos, CurNode->PrevNode);
 		for (Vector2 Dir: Directions)
 		{
 			std::shared_ptr<Node> NextNode = std::make_shared<Node>();
 			NextNode->Pos = CurNode->Pos + Dir;
-			NextNode->PrevNode = CurNode;
+
 			// 갈 수 없는 곳이면 continue
 			if (OutOfRange(NextNode->Pos)) continue;
 			if (NextNode->Pos != End && m_Cards[NextNode->Pos.y][NextNode->Pos.x]->GetState() != CARD_STATE::INVISIBLE) continue;
-			
-			NextNode->Turn = CurNode->Turn;
+
 			if (CurNode->PrevNode != nullptr
 				&& abs((NextNode->Pos - CurNode->PrevNode->Pos).x) == 1
 				&& abs((NextNode->Pos - CurNode->PrevNode->Pos).y) == 1)
-				NextNode->Turn++;
-			if (NextNode->Turn >= 3) continue;
+			{
+				NextNode->PrevNode = NewCurNode;
+				NextNode->Turn = NewCurNode->Turn;
+				if (NextNode->Turn >= 3) continue;
+			}
+			else
+			{
+				NextNode->PrevNode = CurNode;
+				NextNode->Turn = CurNode->Turn;
+			}
 
 			NextNode->G = CurNode->G + 1;
 			NextNode->F = NextNode->G + NextNode->Pos.GetDistance(End);
 
+			if (vec2BestNode[NextNode->Pos.y][NextNode->Pos.x] != nullptr
+				&& *vec2BestNode[NextNode->Pos.y][NextNode->Pos.x] < *NextNode)
+				continue;
+
+			vec2BestNode[NextNode->Pos.y][NextNode->Pos.x] = NextNode;
 			PQ.push(NextNode);
 		}
 	}

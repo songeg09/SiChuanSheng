@@ -102,6 +102,23 @@ void Card::MarkPath( Vector2 inVec,  Vector2 outVec)
 		m_State = CARD_STATE::PATH_UPTOLEFT;
 }
 
+bool Card::SelectCard(POINT pt)
+{
+	if (!HasTexture()) return false;
+	if (m_State != CARD_STATE::VISIBLE) return false;
+
+	if (PtInRect(&m_ClickArea, pt))
+	{
+		if(m_State == CARD_STATE::SELECTED)
+			m_State = CARD_STATE::VISIBLE;
+		else
+			m_State = CARD_STATE::SELECTED;
+		return true;
+	}
+
+	return false;
+}
+
 bool Card::Update(const POINT& pt)
 {
 	if (!HasTexture()) return false;

@@ -38,6 +38,9 @@ public:
 
 	bool HasTexture() { return m_pTexture != nullptr; }
 
+	// Test¿ë
+	bool SelectCard(POINT pt);
+
 	// Getters & Setters
 	CARD_STATE GetState() { return m_State; }
 	Vector2 GetPosition() { return m_vec2Position; }

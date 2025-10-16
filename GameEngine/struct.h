@@ -98,6 +98,20 @@ struct Node
 			return F > _other.F;
 		return Turn > _other.Turn;
 	}
+
+	bool operator<= (const Node _other) const
+	{
+		if (Turn == _other.Turn)
+			return F <= _other.F;
+		return Turn <= _other.Turn;
+	}
+
+	bool operator>= (const Node _other) const
+	{
+		if (Turn == _other.Turn)
+			return F >= _other.F;
+		return Turn >= _other.Turn;
+	}
 };
 
 struct Cmp {

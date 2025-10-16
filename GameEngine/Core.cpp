@@ -57,7 +57,7 @@ void Core::Init(HWND _hWnd)
 	// 보드 생성 및, 초기 값 설정
 	m_Board.Init(m_hBackDC);
 	m_tTimer.SetTimer(TIME_SPEED, std::bind(&Core::DecraseTime, this));
-	m_State = GAME_STATE::PREGAME;
+	m_State = GAME_STATE::PRETEST;
 }
 
 void Core::GameLoop()
@@ -77,6 +77,32 @@ void Core::Update()
 {
 	switch (m_State)
 	{
+	case GAME_STATE::PRETEST:
+		m_Board.PrepareTest();
+		m_State = GAME_STATE::TESTSETUP;
+		break;
+
+	case GAME_STATE::TESTSETUP:
+		InputManager::GetInstance()->Update();
+		if (InputManager::GetInstance()->GetKeyState(VK_RBUTTON) == KEY_STATE::DOWN)
+		{
+			m_Board.TestIsReady();
+			m_State = GAME_STATE::TESTING;
+		}
+		else if (InputManager::GetInstance()->GetKeyState(VK_LBUTTON) == KEY_STATE::DOWN)
+		{
+			m_Board.SettingCards();
+		}
+		break;
+
+	case GAME_STATE::TESTING:
+		InputManager::GetInstance()->Update();
+		if (InputManager::GetInstance()->GetKeyState(VK_LBUTTON) == KEY_STATE::DOWN)
+		{
+			m_Board.SelectTestCards();
+		}
+		break;
+
 	case GAME_STATE::PREGAME:
 		m_iScore = 0;
 		m_iShuffleCount = MAX_SHUFFLE_COUNT;
@@ -94,6 +120,7 @@ void Core::Update()
 		{
 			m_Board.InGameShuffle();
 			m_iShuffleCount--;
+			
 		}
 		else if (InputManager::GetInstance()->GetKeyState(VK_LBUTTON) == KEY_STATE::DOWN)
 		{
